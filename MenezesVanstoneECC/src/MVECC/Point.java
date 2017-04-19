@@ -1,9 +1,12 @@
 package MVECC;
 
+import java.math.BigInteger;
+
 public class Point {
 	private long x;
 	private long y; 
-	
+	BigInteger x1;
+	BigInteger x2;
 	public Point(){
 		
 	}
@@ -12,6 +15,10 @@ public class Point {
 		this.y=y;
 	}
 	
+	public Point(BigInteger x1, BigInteger x2){
+		this.x1=x1;
+		this.x2=x2;
+	}
 	public long getX(){
 		return x;
 	}
@@ -32,5 +39,8 @@ public class Point {
 	public String toString() {
 		String result=x+" "+y;
 		return result;
+	}
+	public boolean isEqual(Point p) {
+		return x==p.x && y==p.y;
 	}
 }
