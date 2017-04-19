@@ -92,13 +92,16 @@ public class EllipticCurveMV {
 		Point[] p=new Point[bytes.length];
 		int j=0;
 	    Point plaintext=new Point(9,1);
-	    y0=operation.encrypt(plaintext, pub, generator);
-		/*for(int i=0;i<bytes.length;i++){
+	    y0=operation.computep0(pub, generator);
+		for(int i=0;i<bytes.length;i++){
 			p[i]=map(bytes[i]);
-			y0=operation.encrypt(p[i], pub, generator);
+			operation.encrypt(p[i], pub, generator);
+			y1=operation.gety1();
+			y2=operation.gety2();
 			result[j]=map(y0);
 			j++;
-		}*/
+			
+		}
 	 /*BigInteger*/ y1=operation.gety1();
 	 /*BigInteger*/ y2=operation.gety2();
 		//byte[] r1=y1.toByteArray();

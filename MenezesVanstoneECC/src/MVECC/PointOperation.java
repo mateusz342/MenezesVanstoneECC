@@ -121,6 +121,13 @@ public class PointOperation {
         return res;
     }
     
+   public Point computep0(Point pub,Point generator){
+	long p=EllipticCurveMV.p;
+   	long k=6;
+   	Point y0=new Point();
+   	y0=multiply(k, generator);
+   	return y0;
+   }
     public Point encrypt(Point pm,Point pub,Point generator){
     	long p=EllipticCurveMV.p;
     	long k=6;
@@ -142,6 +149,8 @@ public class PointOperation {
     	this.y2=y2;
     	return y0;
     }
+    
+ 
 
     public Point decrypt(Point y0,long y1,long y2,long pri,Point generator){
     	EllipticCurveMV algorithm=new EllipticCurveMV();
