@@ -133,7 +133,7 @@ public class PointOperation {
     	long k=6;
     	Point y0=new Point();
     	Point beta=new Point();
-    	Point plaintext=new Point(9,1);
+    	//Point plaintext=new Point(9,1);
     	y0=multiply(k, generator);
     	beta=multiply(k,pub);
     	
@@ -170,8 +170,9 @@ public class PointOperation {
     	
     	BigInteger x1=(y1big.multiply(invc1)).mod(p);
     	BigInteger x2=(y2big.multiply(invc2)).mod(p);
-    	
-    	Point plaintext=new Point(x1,x2);
+    	long x11=x1.longValue();
+    	long x22=x2.longValue();
+    	Point plaintext=new Point(x11,x22);
     	return plaintext;
     }
    /* public BigInteger gety1(){

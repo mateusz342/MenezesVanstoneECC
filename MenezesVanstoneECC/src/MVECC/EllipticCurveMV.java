@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 public class EllipticCurveMV {
-	public static final long p=11;
+	public static final long p=67003;
 	public static final long a=1;
 	public static final long b=6;
 	public final Point generator;
@@ -60,22 +60,29 @@ public class EllipticCurveMV {
 	   }
 	
 	//from byte to Point
-	private Point map(byte b){
-		int index=(int)b&(0xFF);
-		Point result=new Point(field.get(index).getX(),field.get(index).getY());
+	private Point map(byte[] b){
+		byte[] x1=new byte[b.length/2];
+		byte[] x2=new byte[b.length-x1.length];
+		System.arraycopy(b, 0, x1, 0, b.length/2);
+		System.arraycopy(b, b.length/2, x2, 0, b.length-x1.length);
+		BigInteger x11=new BigInteger(x1);
+		BigInteger x22=new BigInteger(x2);
+		long x111=x11.longValue();
+		long x222=x22.longValue();
+		Point result=new Point(x111,x222);
 		return result;
 	}
 	
 	
 	//from Point to byte
-	private byte map(Point p){
-		byte result=0;
-		for(int i=0;i<field.size();i++){
-			if(field.get(i).isEqual(p)){
-				result=(byte) i;
-				break;
-			}
-		}
+	private byte[] map(Point p){
+		BigInteger x1=BigInteger.valueOf(p.getX());
+		BigInteger x2=BigInteger.valueOf(p.getY());
+		byte[] array1=x1.toByteArray();
+		byte[] array2=x2.toByteArray();
+		byte[] result=new byte[array1.length+array2.length];
+		System.arraycopy(array1, 0, result, 0, array1.length);
+		System.arraycopy(array2, 0, result, array1.length,array2.length);
 		return result;
 	}
 	
@@ -91,9 +98,13 @@ public class EllipticCurveMV {
 		byte[] result=new byte[bytes.length*2];
 		Point[] p=new Point[bytes.length];
 		int j=0;
-	    Point plaintext=new Point(9,1);
-	    y0=operation.computep0(pub, generator);
-		for(int i=0;i<bytes.length;i++){
+	    //Point plaintext=new Point(9,1);
+	    Point plaintext=map(bytes);
+		y0=operation.computep0(pub, generator);
+		operation.encrypt(plaintext, pub, generator);
+		y1=operation.gety1();
+		y2=operation.gety2();
+		/*for(int i=0;i<bytes.length;i++){
 			p[i]=map(bytes[i]);
 			operation.encrypt(p[i], pub, generator);
 			y1=operation.gety1();
@@ -101,7 +112,7 @@ public class EllipticCurveMV {
 			result[j]=map(y0);
 			j++;
 			
-		}
+		}*/
 	 /*BigInteger*/ y1=operation.gety1();
 	 /*BigInteger*/ y2=operation.gety2();
 		//byte[] r1=y1.toByteArray();
@@ -115,8 +126,9 @@ public class EllipticCurveMV {
 	}
 	public byte[] decrypt(byte[] bytes,long pri){
 		PointOperation operation=new PointOperation();
-		byte[] result=new byte[bytes.length/2];
-		operation.decrypt(y0,y1,y2, pri, generator);
+		//byte[] result=new byte[bytes.length/2];
+		Point plaintext=operation.decrypt(y0,y1,y2, pri, generator);
+	byte[] result=map(plaintext);
 	       return result;
 	}
 }

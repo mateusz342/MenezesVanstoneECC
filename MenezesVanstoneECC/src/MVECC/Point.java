@@ -5,8 +5,8 @@ import java.math.BigInteger;
 public class Point {
 	private long x;
 	private long y; 
-	BigInteger x1;
-	BigInteger x2;
+	private  BigInteger x1;
+	private BigInteger x2;
 	public Point(){
 		
 	}
