@@ -1,7 +1,9 @@
 package MVECC;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -29,14 +31,43 @@ public class MVECCmain {
 		PointOperation operations=new PointOperation();
 		System.out.println("Generator "+algorithm.generator);
 		String text="My name is Mateusz! His name is Olek.";
-		byte[] bytes=text.getBytes();
-		//byte[] bytes=algorithm.readDocument();
+		//byte[] bytes=text.getBytes();
+		byte[] bytes=algorithm.readDocument();
 		long privkey=7;
 		Point pubkey=operation.multiply(privkey, algorithm.generator);
-		/*byte[] result*/ArrayList<Long> result=algorithm.encrypt(bytes,pubkey);
+		ArrayList<Long> result=algorithm.encrypt(bytes,pubkey);
+		System.out.print("Ciphertext:");
+		byte[] ciphertext=new byte[result.size()];
+		for(int i=0;i<result.size();i++){
+			ciphertext[i]=result.get(i).byteValue();
+		}
+		String finalciphertext=new String(ciphertext,StandardCharsets.UTF_8);
+		System.out.println(finalciphertext);
 		byte[] plaintext=algorithm.decrypt(result, privkey);
 		String finalresult = new String(plaintext, StandardCharsets.UTF_8);
-		System.out.println(finalresult);
+		System.out.println("Output:"+finalresult);
+		
+		BufferedWriter writer = null;
+		try
+		{
+		    writer = new BufferedWriter( new FileWriter("D:/git/MenezesVanstone/MenezesVanstoneECC/src/MVECC/Out.txt"));
+		    writer.write(finalresult);
+
+		}
+		catch ( IOException e)
+		{
+		}
+		finally
+		{
+		    try
+		    {
+		        if ( writer != null)
+		        writer.close( );
+		    }
+		    catch ( IOException e)
+		    {
+		    }
+		}
 	}
 
 }

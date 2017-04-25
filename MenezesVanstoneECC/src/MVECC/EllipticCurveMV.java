@@ -2,6 +2,7 @@ package MVECC;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -14,6 +15,7 @@ public class EllipticCurveMV {
 	public static final long p=67003;
 	public static final long a=1;
 	public static final long b=6;
+	private static final BigInteger IOUtils = null;
 	public final Point generator;
 	private final long NULL_VALUE = -1;
 
@@ -189,7 +191,7 @@ public class EllipticCurveMV {
 
 		    while (line != null) {
 		        sb.append(line);
-		        sb.append(System.lineSeparator());
+		        //sb.append(System.lineSeparator());
 		        line = br.readLine();
 		    }
 		  everything = sb.toString();
