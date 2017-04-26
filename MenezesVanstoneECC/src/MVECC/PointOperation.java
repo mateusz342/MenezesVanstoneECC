@@ -1,32 +1,36 @@
 package MVECC;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.*;
 import javafx.util.*;
 public class PointOperation {
-	//BigInteger y1,y2;
-	long y1,y2;
+	BigInteger y1;
+	BigInteger y2;
 	Point y0;
+	BigInteger two=BigInteger.valueOf(2);
+	BigInteger three=BigInteger.valueOf(3);
+	
+	//double Point
 	public Point doublePoint(Point P){
 		Point result=new Point();
 		
-		if(P.getY()==0){
-			result.setX(0);
-			result.setY(0);
+		if(P.getY().equals(BigInteger.ZERO)){
+			result.setX(BigInteger.ZERO);
+			result.setY(BigInteger.ZERO);
 		}
 		else{
-			long lambda,inv,xnew,ynew;
-			long p=EllipticCurveMV.p;
-			long a=EllipticCurveMV.a;
-			lambda=((((3*P.getX()*P.getX())%p)+a)%p);
-			inv=getInverse(2*P.getY(),p);
-			lambda*=inv;
-			lambda%=p;
+			BigInteger lambda,inv,xnew,ynew;
+			BigInteger p=EllipticCurveMV.p;
+			BigInteger a=EllipticCurveMV.a;
+			lambda=((three.multiply(P.getX().modPow(two, p)).add(a))).mod(p);
+			inv=(BigInteger.valueOf(2).multiply(P.getY().mod(p))).modInverse(p);
+			lambda=(lambda.multiply(inv)).mod(p);
 			
-			xnew=(((lambda*lambda)%p)-(2*P.getX()%p)+p)%p;
-			ynew=(((lambda*(P.getX()-xnew))%p)-P.getY()+p)%p;
+			xnew=(((lambda.multiply(lambda)).mod(p)).subtract(P.getX()).subtract(P.getX())).mod(p);
+			ynew=(((lambda.multiply((P.getX().subtract(xnew)).mod(p))).subtract(P.getY())).mod(p));
 			
-			if(ynew<0){
-				ynew+=p;
+			if(ynew.compareTo(BigInteger.ZERO)<0){
+				ynew=ynew.add(p);
 			}
 			
 			result.setX(xnew);
@@ -35,72 +39,47 @@ public class PointOperation {
 		return result;
 	}
 	
-	public long getInverse(long n,long m){
-		while(n>m){
-			n-=m;
-		}
-		while(n<0){
-			n+=m;
-		}
-        long gq = m, gy = 0;
-        long lq = n, ly = 1;
-        long tq = lq, ty = ly;
-        while (lq != 1) {
-            long d = gq/lq;
-            lq = gq - d*lq; ly = gy - d*ly;
-            gq = tq; gy = ty;
-            tq = lq; ty = ly;
-        }
-        if (ly < 0) {
-            ly += m;
-        }
-        return ly;
-	}
-	
+	//addition two Points
 	public Point add(Point p1, Point p2){
 		Point result=new Point();
-		long p=EllipticCurveMV.p;
+		BigInteger p=EllipticCurveMV.p;
 		
-		if(p1.getX()==0 && p1.getY()==0){
+		if(p1.getX().equals(BigInteger.ZERO) && p1.getY().equals(BigInteger.ZERO)){
 			result.setX(p2.getX());
 			result.setY(p2.getY());
 		}
-		else if(p2.getX()==0 && p2.getY()==0){
+		else if(p2.getX().equals(BigInteger.ZERO) && p2.getY().equals(BigInteger.ZERO)){
 			 result.setX(p1.getX());
 	         result.setY(p1.getY());
 		}
-		else if(p1.getY() == -p2.getY()){
-			result.setX(0);
-			result.setY(0);
-		}
-		else if(p1.getX()-p2.getY()==0){
-			result.setX(Long.MAX_VALUE);
-			result.setY(Long.MAX_VALUE);
+		else if(p1.getY().equals(BigInteger.ZERO.subtract(p2.getY()))){
+			result.setX(BigInteger.ZERO);
+			result.setY(BigInteger.ZERO);
 		}
 		else{
-			long lambda, xnew, ynew,inv;
+			BigInteger lambda, xnew, ynew,inv;
 			
-			lambda=(p2.getY()-p1.getY())%p;
-			inv=getInverse(p2.getX()-p1.getX(),p);
-			lambda*=inv;
-			lambda%=p;
-			
-			xnew=(((lambda*lambda)%p)-p1.getX()-p2.getX()+2*p)%p;
-			ynew=(((lambda*(p1.getX()-xnew))%p)-p1.getY()+2*p)%p;
+			lambda=(p2.getY().subtract(p1.getY())).mod(p);
+			inv=(p2.getX().subtract(p1.getX())).modInverse(p);
+			lambda=(lambda.multiply(inv)).mod(p);
+			xnew=(((lambda.multiply(lambda)).mod(p)).subtract(p1.getX()).subtract(p2.getX())).mod(p);
+			ynew=(((lambda.multiply((p1.getX().subtract(xnew)).mod(p))).subtract(p1.getY())).mod(p));
 			
 			result.setX(xnew);
 			result.setY(ynew);
 		}
 		return result;
 	}
-	public Point multiply(long privkey,Point base){
-		Point result=new Point();
+	//the multiplication of Point
+	public Point multiply(BigInteger privkey,Point base){
+		Point result=new Point(BigInteger.ZERO,BigInteger.ZERO);
 		Point generator=new Point(base.getX(),base.getY());
-		
-		 String binary = Long.toBinaryString(privkey);
-	        for (int i=binary.length()-1; i>=0; i--) {
+		long privkey1=6;
+		 String binary1 = Long.toBinaryString(privkey1);
+	       String binary=privkey.toString(2);
+			for (int i=binary.length()-1; i>=0; i--) {
 	            if (binary.charAt(i) == '1') {
-	                if (i == binary.length()-1){
+	                if (result.getX()==BigInteger.ZERO && result.getY()==BigInteger.ZERO){
 	                    result = generator;
 	                } else {
 	                    result = add(generator,result);
@@ -110,92 +89,54 @@ public class PointOperation {
 	        }
 	        return result;
 	}
-    public Point minus(Point p1, Point p2){
-        Point temp = new Point();
-        Point res = new Point();
-        
-        temp.setX(p2.getX());
-        temp.setY(-p2.getY());
-        
-        res = add(p1, temp);
-        
-        return res;
-    }
-    
-   public Point computep0(Point pub,Point generator){
-	long p=EllipticCurveMV.p;
-   	long k=6;
+	//the computation of y0
+   public Point computey0(Point generator,BigInteger k){
+	BigInteger p=EllipticCurveMV.p;
    	Point y0=new Point();
    	y0=multiply(k, generator);
    	return y0;
    }
-    public ArrayList<Long>/*Point*/ encrypt(ArrayList<Point> pm,Point pub,Point generator){
-    	long p=EllipticCurveMV.p;
-    	long k=6;
-    	Point y0=new Point();
+   
+   //enryption
+    public ArrayList<BigInteger> encrypt(ArrayList<Point> pm,Point pub,Point generator,BigInteger k){
+    	BigInteger p=EllipticCurveMV.p;
     	Point beta=new Point();
-    	ArrayList<Long> ciphertext=new ArrayList<>();
-    	//Point plaintext=new Point(9,1);
-    	y0=multiply(k, generator);
+    	ArrayList<BigInteger> ciphertext=new ArrayList<>();
     	beta=multiply(k,pub);
     	
-    	long c1=beta.getX();
-    	long c2=beta.getY();
+    	BigInteger c1=beta.getX();
+    	BigInteger c2=beta.getY();
     	for(int i=0;i<pm.size();i++){
     		Point tocipher=pm.get(i);
-    		y1=(c1*tocipher.getX())%p;
-    		y2=(c2*tocipher.getY())%p;
+    		y1=(c1.multiply(tocipher.getX())).mod(p);
+    		y2=(c2.multiply(tocipher.getY())).mod(p);
     		ciphertext.add(y1);
     		ciphertext.add(y2);
     	}
-    	//y1=(c1*pm.getX())%p;
-    	//y2=(c2*pm.getY())%p;
-    	//y1=BigInteger.valueOf(c1).multiply(BigInteger.valueOf(pm.getX())).mod(BigInteger.valueOf(p));
-    	//y2=BigInteger.valueOf(c2).multiply(BigInteger.valueOf(pm.getY())).mod(BigInteger.valueOf(p));
-    	
-    	//this.y1=y1;
-    	//this.y2=y2;
-    	//return y0;
     	return ciphertext;
     }
     
  
-
-    public Point decrypt(Point y0,long y1,long y2,long pri,Point generator){
-    	//EllipticCurveMV algorithm=new EllipticCurveMV();
-    	long p=EllipticCurveMV.p;
+    //decryption
+    public Point decrypt(Point y0,BigInteger y1,BigInteger y2,BigInteger pri,Point generator){
+    	BigInteger p=EllipticCurveMV.p;
     	Point decrypt=multiply(pri,y0);
-    	//Point plaintext=new Point();
-    	long c1=decrypt.getX();
-    	long c2=decrypt.getY();
+    	BigInteger c1=decrypt.getX();
+    	BigInteger c2=decrypt.getY();
     	
-    	BigInteger y1big=BigInteger.valueOf(y1);//y1;
-    	BigInteger y2big=BigInteger.valueOf(y2);//y2;
-    	BigInteger c1big=BigInteger.valueOf(c1);
-    	BigInteger c2big=BigInteger.valueOf(c2);
+    	BigInteger invc1=c1.modInverse(p);
+    	BigInteger invc2=c2.modInverse(p);
     	
-    	BigInteger p1=BigInteger.valueOf(p);
-    	BigInteger invc1=c1big.modInverse(p1);
-    	BigInteger invc2=c2big.modInverse(p1);
-    	
-    	BigInteger x1=(y1big.multiply(invc1)).mod(p1);
-    	BigInteger x2=(y2big.multiply(invc2)).mod(p1);
-    	long x11=x1.longValue();
-    	long x22=x2.longValue();
-    	Point plaintext=new Point(x11,x22);
+    	BigInteger x1=(y1.multiply(invc1)).mod(p);
+    	BigInteger x2=(y2.multiply(invc2)).mod(p);
+
+    	Point plaintext=new Point(x1,x2);
     	return plaintext;
     }
-   /* public BigInteger gety1(){
+    public BigInteger gety1(){
     	return y1;
     }
     public BigInteger gety2(){
-    	return y2;
-    }
-    */
-    public long gety1(){
-    	return y1;
-    }
-    public long gety2(){
     	return y2;
     }
     public Point gety0(){

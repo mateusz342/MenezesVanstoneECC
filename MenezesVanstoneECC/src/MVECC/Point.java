@@ -1,37 +1,38 @@
 package MVECC;
 
 import java.math.BigInteger;
+import java.security.spec.ECPoint;
 
-public class Point {
-	private long x;
-	private long y; 
-	private  BigInteger x1;
-	private BigInteger x2;
+public class Point implements java.io.Serializable{
+	//private long x;
+	//private long y; 
+	private  BigInteger x;
+	private BigInteger y;
 	public Point(){
 		
 	}
-	public Point(long x,long y){
+	/*public Point(long x,long y){
 		this.x=x;
 		this.y=y;
 	}
-	
-	public Point(BigInteger x1, BigInteger x2){
-		this.x1=x1;
-		this.x2=x2;
+	*/
+	public Point(BigInteger x, BigInteger y){
+		this.x=x;
+		this.y=y;
 	}
-	public long getX(){
+	public BigInteger getX(){
 		return x;
 	}
 	
-	public long getY(){
+	public BigInteger getY(){
 		return y;
 	}
 	
-	public void setX(long x){
+	public void setX(BigInteger x){
 		this.x=x;
 	}
 	
-	public void setY(long y){
+	public void setY(BigInteger y){
 		this.y=y;
 	}
 	
