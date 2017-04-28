@@ -16,7 +16,8 @@ public class MVECCmain {
 	public static void main(String[] args) throws IOException {
 		EllipticCurveMV algorithm=new EllipticCurveMV();
 		BigInteger p=algorithm.generateP();
-		Point generator=new Point(new BigInteger("257015440179535"),new BigInteger("787265208059509"));//algorithm.thebasepoint(p);
+		//Point generator=new Point(new BigInteger("257015440179535"),new BigInteger("787265208059509"));//algorithm.thebasepoint(p);
+		Point generator=algorithm.thepoint(p);
 		System.out.println(generator);
 		BigInteger privkey;
 		do{

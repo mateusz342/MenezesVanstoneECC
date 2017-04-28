@@ -14,14 +14,18 @@ import java.util.Random;
 public class EllipticCurveMV {
 	private EllipticCurve c;
 	public static BigInteger p;
+	String hexa="";
+	static String hexb="64210519 e59c80e7 0fa7e9ab 72243049 feb8deec c146b9b1";
 	public static final BigInteger a=new BigInteger("556675194");
-	public static final BigInteger b=new BigInteger("3547273738");
+	public static final BigInteger b=new BigInteger(/*hexb,16*/"3547273738");
 	private static final BigInteger IOUtils = null;
 	//public final Point generator;
 	private final long NULL_VALUE = -1;
-
+	private int e=0;
 	private ArrayList<Point> field;
 	public ArrayList<BigInteger> ciphertext;
+	public ArrayList<Integer> table=new ArrayList<Integer>();
+	BigInteger two=new BigInteger("2");
 	//private BigInteger[] poweredByTwo;
 	public ArrayList<BigInteger> poweredByTwo=new ArrayList<BigInteger>();
 	BigInteger y1;
@@ -39,30 +43,122 @@ public class EllipticCurveMV {
 	    //generator =thebasepoint();// point; // Creating generator point
 	//}
 	public BigInteger generateP(){
-		//do{
-		//p=new BigInteger(160,new SecureRandom());
-		//}while(p.isProbablePrime(100)==false);
-		p=new BigInteger("1125899906842679");
+		do{
+		p=new BigInteger(192,new SecureRandom());
+		}while(p.isProbablePrime(100)==false);
+		//p=new BigInteger("1125899906842679");
 		return p;
 	}
 	
 	//searching point on Elliptic Curve(working in sensible time for small coefficient)
-	public Point thebasepoint(BigInteger p){
+	public Point thepoint(BigInteger p){
 		BigInteger x;
 		BigInteger y;
-		BigInteger max=new BigInteger("130000000");
-		while(found==false){
+		BigInteger ysqrt;
+		int l;
 		do{
-		x=new BigInteger(7,new SecureRandom());
+		do{
+			x=new BigInteger(193,new SecureRandom());
+		}while(p.compareTo(x)<0);
 		y=(x.modPow(BigInteger.valueOf(3), p).add(a.multiply(x)).add(b)).mod(p);
-		}while(y.equals(0) /*|| y.compareTo(max)>0*/);
-		G=isresidue(y,p);
-		GonCurve=new Point(x,G.getY());
-		if(GonCurve.getY().equals(BigInteger.valueOf(0))==false){
-			found=true;
+		l=LegandreSymbol(y, p);
+		}while(!(y.equals(BigInteger.ZERO)) && l!=1);
+		ysqrt=SquareRootComputation(y, p);
+		G=new Point(x,ysqrt);
+		return G;
+	}
+	
+	//Legendre symbol computation
+	private int LegandreSymbol(BigInteger x,BigInteger p){
+		int k=1;
+		while(!(p.equals(BigInteger.ONE))){
+			if(x.equals(BigInteger.ZERO)){
+				return 0;
+			}
+			int v=0;
+			while((x.mod(BigInteger.valueOf(2)).equals(BigInteger.ZERO))){
+				v+=1;
+				x=x.divide(BigInteger.valueOf(2));
+			}
+			if(v%2==1 && (p.mod(BigInteger.valueOf(8)).equals(BigInteger.valueOf(3)) || p.mod(BigInteger.valueOf(8)).equals(BigInteger.valueOf(-3)))){
+				k=-k;
+			}
+			if(x.mod(BigInteger.valueOf(4)).equals(BigInteger.valueOf(3)) && p.mod(BigInteger.valueOf(4)).equals(BigInteger.valueOf(3))){
+				k=-k;
+			}
+			BigInteger r;
+			r=x;
+			x=p.mod(r);
+			p=r;
 		}
-		}
-		return GonCurve;
+		return k;
+	}
+	
+	
+	//Tonelli and Shanks square root computation
+	private BigInteger SquareRootComputation(BigInteger y, BigInteger p){
+		BigInteger pminus1=p.subtract(BigInteger.ONE);
+		int l=0;
+		BigInteger n;
+		BigInteger z;
+		BigInteger r;
+		BigInteger y1;
+		BigInteger ysqrt=BigInteger.ZERO;
+		BigInteger b;
+		int s;
+		int exponent;
+		do{
+			if(pminus1.mod(two.pow(e)).equals(BigInteger.ZERO)){
+				table.add(e);
+			}
+			e++;
+		}while(!(two.pow(e).compareTo(p)>0));
+		
+		e=table.get(table.size()-1);
+		r=pminus1.divide(two.pow(e));
+		
+		do{
+		n=new BigInteger(p.bitCount()-1,new Random());
+		l=LegandreSymbol(n, p);
+		}while(l!=-1);
+		if(e==1){
+			BigInteger exponent2=(p.add(BigInteger.ONE)).divide(BigInteger.valueOf(4));
+			ysqrt=(ysqrt.add(y.modPow(exponent2, p)));
+			return ysqrt;
+			}
+		z=n.modPow(r, p);
+		y1=z;
+		s=e;
+		BigInteger exponent1=(r.subtract(BigInteger.ONE)).divide(two);
+		ysqrt=y.modPow(((r.subtract(BigInteger.ONE)).divide(two)), p);
+		b=(y.multiply(ysqrt.pow(2))).mod(p);
+		ysqrt=(y.multiply(ysqrt)).mod(p);
+		int m;
+		BigInteger t;
+		while((b.mod(p).equals(BigInteger.ONE))==false){
+			m=1;
+			while((b.modPow((two.pow(m)), p).equals(BigInteger.ONE)==false&& m<s-1)){
+				m+=1;
+			}
+			if(s==m){
+				m-=1;
+			}
+			exponent=s-m-1;
+			BigInteger twoinverse=new BigInteger("2");
+			/*if(exponent<0){
+				twoinverse=twoinverse.modInverse(p);
+				exponent=-exponent;
+				twoinverse=twoinverse.pow(exponent);
+			}*/
+			//t=y1.modPow((twoinverse.pow(exponent)), p);
+			t=y1.modPow((two.pow(exponent)), p);
+			y1=t.modPow(two, p);
+			s=m;
+			ysqrt=(t.multiply(ysqrt)).mod(p);
+			b=(y1.multiply(b)).mod(p);
+			}
+		
+	return ysqrt;
 	}
 	//checking if y^2=x^3+ax+b
 	public Point isresidue( BigInteger a,BigInteger p){
