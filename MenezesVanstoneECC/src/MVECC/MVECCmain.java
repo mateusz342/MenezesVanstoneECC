@@ -15,10 +15,12 @@ import javax.sound.sampled.AudioFormat.Encoding;
 public class MVECCmain {
 	public static void main(String[] args) throws IOException {
 		EllipticCurveMV algorithm=new EllipticCurveMV();
-		BigInteger p=algorithm.generateP();
-		//Point generator=new Point(new BigInteger("257015440179535"),new BigInteger("787265208059509"));//algorithm.thebasepoint(p);
-		p=algorithm.getp();
-		Point generator=algorithm.thepoint(p);
+		Point generator;
+		BigInteger p;
+		do{
+		p=algorithm.generateP();
+		generator=algorithm.thepoint(p);
+		}while(generator.getY().equals(BigInteger.ZERO));
 		System.out.println(generator);
 		BigInteger privkey;
 		do{

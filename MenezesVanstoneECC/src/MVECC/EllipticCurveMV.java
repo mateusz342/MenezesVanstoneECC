@@ -105,7 +105,7 @@ public class EllipticCurveMV {
 	}
 	
 	
-	//Tonelli and Shanks square root computation
+	//Tonelli and Shanks square root computation algorithm
 	private BigInteger SquareRootComputation(BigInteger y, BigInteger p){
 		BigInteger pminus1;
 		int l=0;
@@ -116,7 +116,6 @@ public class EllipticCurveMV {
 		BigInteger ysqrt;
 		int exponent=0;
 		//BigInteger b;
-		do{
 		pminus1=p.subtract(BigInteger.ONE);
 		ArrayList<Integer> table=new ArrayList<Integer>();
 		int e=0;
@@ -150,6 +149,7 @@ public class EllipticCurveMV {
 		
 		int exp=e;
 		int straznik=0;
+		
 		//keep looping until b become 1 or m becomes 0
 		while(straznik==0){
 			int m;
@@ -170,9 +170,7 @@ public class EllipticCurveMV {
 			//update the values
 			exponent=exp-m-1;
 			if(exponent<0){
-				p=generateP();
-				this.p=p;
-				break;
+				return BigInteger.ZERO;
 			}
 			ysqrt=(ysqrt.multiply(g.modPow(two.pow(exp-m-1),p)).mod(p));
 			g=g.modPow(two.pow(exp-m), p);
@@ -183,7 +181,6 @@ public class EllipticCurveMV {
 			}
 			exp=m;
 		}
-	}while(exponent<0);
 	return ysqrt;
 	}
 	
