@@ -44,7 +44,7 @@ public class MVECCmain {
 		
 		//write file
 		BufferedWriter writer = null;
-	try
+		try
 		{
 		    writer = new BufferedWriter( new FileWriter("D:/git/MenezesVanstone/MenezesVanstoneECC/src/MVECC/Out.txt"));//change to your pathfile
 		    writer.write(finalresult);

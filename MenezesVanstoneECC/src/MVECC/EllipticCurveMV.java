@@ -12,19 +12,11 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class EllipticCurveMV {
-	private EllipticCurve c;
 	public static BigInteger p;
-	String hexa="";
-	static String hexb="64210519 e59c80e7 0fa7e9ab 72243049 feb8deec c146b9b1";
-	public static final BigInteger a=new BigInteger("556675194");
-	public static final BigInteger b=new BigInteger(/*hexb,16*/"3547273738");
-	private static final BigInteger IOUtils = null;
-	//public final Point generator;
-	private final long NULL_VALUE = -1;
-	private ArrayList<Point> field;
+	public static final BigInteger a=new BigInteger("810017366067207");
+	public static final BigInteger b=new BigInteger("864021329774289");
 	public ArrayList<BigInteger> ciphertext;
 	BigInteger two=new BigInteger("2");
-	//private BigInteger[] poweredByTwo;
 	public ArrayList<BigInteger> poweredByTwo=new ArrayList<BigInteger>();
 	BigInteger y1;
 	BigInteger y2;
@@ -34,12 +26,8 @@ public class EllipticCurveMV {
 	boolean found=false;
 	Point H;
 	Point GonCurve;
-	//Elliptic Curve y^2=x^3+Ax+Bx
-	//public EllipticCurveMV(){
-		//field = generateGaloisField();
-		//Point point=new Point(BigInteger.valueOf(2),BigInteger.valueOf(4));
-	    //generator =thebasepoint();// point; // Creating generator point
-	//}
+	
+	//generation of modulus p(in this case 192bit)
 	public BigInteger generateP(){
 		int exp=0;
 		do{
@@ -60,7 +48,7 @@ public class EllipticCurveMV {
 		return p;
 	}
 	
-	//searching point on Elliptic Curve(working in sensible time for small coefficient)
+	//searching point on Elliptic Curve
 	public Point thepoint(BigInteger p){
 		BigInteger x;
 		BigInteger y;
@@ -192,6 +180,9 @@ public class EllipticCurveMV {
 	    else
 	        return gcd(b, a.mod(b));
 	}
+	
+/*
+ * Methods below gives sensible result only for long or int values(because uses brute force searching)
 	//checking if y^2=x^3+ax+b
 	public Point isresidue( BigInteger a,BigInteger p){
 		Point epoint;
@@ -226,7 +217,7 @@ public class EllipticCurveMV {
 	    	   i=i.add(BigInteger.valueOf(1));
 	       }while(p.compareTo(i)>0);
 	   }
-	
+	*/
 	//from byte to Point
 	private ArrayList<Point> map(byte[] b){
 		Point result = null;
