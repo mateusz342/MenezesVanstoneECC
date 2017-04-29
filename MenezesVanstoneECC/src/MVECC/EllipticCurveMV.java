@@ -21,10 +21,8 @@ public class EllipticCurveMV {
 	private static final BigInteger IOUtils = null;
 	//public final Point generator;
 	private final long NULL_VALUE = -1;
-	private int e=0;
 	private ArrayList<Point> field;
 	public ArrayList<BigInteger> ciphertext;
-	public ArrayList<Integer> table=new ArrayList<Integer>();
 	BigInteger two=new BigInteger("2");
 	//private BigInteger[] poweredByTwo;
 	public ArrayList<BigInteger> poweredByTwo=new ArrayList<BigInteger>();
@@ -43,9 +41,21 @@ public class EllipticCurveMV {
 	    //generator =thebasepoint();// point; // Creating generator point
 	//}
 	public BigInteger generateP(){
+		int exp=0;
+		do{
 		do{
 		p=new BigInteger(192,new SecureRandom());
 		}while(p.isProbablePrime(100)==false);
+		BigInteger pminus1=p.subtract(BigInteger.ONE);
+		ArrayList<Integer> table1=new ArrayList<Integer>();
+		do{
+			if(pminus1.mod(two.pow(exp)).equals(BigInteger.ZERO)){
+				table1.add(exp);
+			}
+			exp++;
+		}while(!(two.pow(exp).compareTo(p)>0));
+		exp=table1.get(table1.size()-1);
+		}while(exp==1);
 		//p=new BigInteger("1125899906842679");
 		return p;
 	}
@@ -97,16 +107,19 @@ public class EllipticCurveMV {
 	
 	//Tonelli and Shanks square root computation
 	private BigInteger SquareRootComputation(BigInteger y, BigInteger p){
-		BigInteger pminus1=p.subtract(BigInteger.ONE);
+		BigInteger pminus1;
 		int l=0;
 		BigInteger n;
 		BigInteger z;
 		BigInteger r;
 		BigInteger y1;
-		BigInteger ysqrt=BigInteger.ZERO;
-		BigInteger b;
-		int s;
-		int exponent;
+		BigInteger ysqrt;
+		int exponent=0;
+		//BigInteger b;
+		do{
+		pminus1=p.subtract(BigInteger.ONE);
+		ArrayList<Integer> table=new ArrayList<Integer>();
+		int e=0;
 		do{
 			if(pminus1.mod(two.pow(e)).equals(BigInteger.ZERO)){
 				table.add(e);
@@ -115,50 +128,72 @@ public class EllipticCurveMV {
 		}while(!(two.pow(e).compareTo(p)>0));
 		
 		e=table.get(table.size()-1);
+		
 		r=pminus1.divide(two.pow(e));
 		
-		do{
+		/*do{
 		n=new BigInteger(p.bitCount()-1,new Random());
 		l=LegandreSymbol(n, p);
-		}while(l!=-1);
-		if(e==1){
-			BigInteger exponent2=(p.add(BigInteger.ONE)).divide(BigInteger.valueOf(4));
-			ysqrt=(ysqrt.add(y.modPow(exponent2, p)));
-			return ysqrt;
-			}
-		z=n.modPow(r, p);
-		y1=z;
-		s=e;
-		BigInteger exponent1=(r.subtract(BigInteger.ONE)).divide(two);
-		ysqrt=y.modPow(((r.subtract(BigInteger.ONE)).divide(two)), p);
-		b=(y.multiply(ysqrt.pow(2))).mod(p);
-		ysqrt=(y.multiply(ysqrt)).mod(p);
-		int m;
-		BigInteger t;
-		while((b.mod(p).equals(BigInteger.ONE))==false){
-			m=1;
-			while((b.modPow((two.pow(m)), p).equals(BigInteger.ONE)==false&& m<s-1)){
-				m+=1;
-			}
-			if(s==m){
-				m-=1;
-			}
-			exponent=s-m-1;
-			BigInteger twoinverse=new BigInteger("2");
-			/*if(exponent<0){
-				twoinverse=twoinverse.modInverse(p);
-				exponent=-exponent;
-				twoinverse=twoinverse.pow(exponent);
-			}*/
-			//t=y1.modPow((twoinverse.pow(exponent)), p);
-			t=y1.modPow((two.pow(exponent)), p);
-			y1=t.modPow(two, p);
-			s=m;
-			ysqrt=(t.multiply(ysqrt)).mod(p);
-			b=(y1.multiply(b)).mod(p);
-			}
+		}while(l!=-1);*/
 		
+		//finding smallest q
+		BigInteger q=BigInteger.valueOf(2);
+		for(int i=0;;i++){
+			if(q.modPow((p.subtract(BigInteger.ONE)).divide(two), p).equals(p.subtract(BigInteger.ONE))){
+				break;
+			}
+			q=q.add(BigInteger.ONE);
+		}
+		ysqrt=y.modPow((r.add(BigInteger.ONE)).divide(two), p);
+		BigInteger b=y.modPow(r, p);
+		BigInteger g=q.modPow(r, p);
+		
+		int exp=e;
+		int straznik=0;
+		//keep looping until b become 1 or m becomes 0
+		while(straznik==0){
+			int m;
+			for(m=0;m<exp;m++){
+				
+				if(gcd(p,b).equals(BigInteger.ONE)==false){
+					System.out.println("Modulus p and b are not co-prime. Try again!");
+					return BigInteger.valueOf(-1);
+				}
+				
+				if(b.modPow(two.pow(m), p).equals(BigInteger.ONE)){
+					break;
+				}
+			}
+			if(m==0){
+				return ysqrt;
+			}
+			//update the values
+			exponent=exp-m-1;
+			if(exponent<0){
+				p=generateP();
+				this.p=p;
+				break;
+			}
+			ysqrt=(ysqrt.multiply(g.modPow(two.pow(exp-m-1),p)).mod(p));
+			g=g.modPow(two.pow(exp-m), p);
+			b=(b.multiply(g)).mod(p);
+			
+			if(b.mod(p).equals(BigInteger.ONE)){
+				return ysqrt;
+			}
+			exp=m;
+		}
+	}while(exponent<0);
 	return ysqrt;
+	}
+	
+	//computing gcd
+	public BigInteger gcd(BigInteger a, BigInteger b)
+	{
+	    if (b.equals(BigInteger.ZERO))
+	        return a;
+	    else
+	        return gcd(b, a.mod(b));
 	}
 	//checking if y^2=x^3+ax+b
 	public Point isresidue( BigInteger a,BigInteger p){
