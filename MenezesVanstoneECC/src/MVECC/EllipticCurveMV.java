@@ -13,8 +13,8 @@ import java.util.Random;
 
 public class EllipticCurveMV {
 	public static BigInteger p;
-	public static final BigInteger a=new BigInteger("810017366067207");
-	public static final BigInteger b=new BigInteger("864021329774289");
+	public static  BigInteger a;//=new BigInteger("810017366067207");
+	public static  BigInteger b;//=new BigInteger("864021329774289");
 	public ArrayList<BigInteger> ciphertext;
 	BigInteger two=new BigInteger("2");
 	public ArrayList<BigInteger> poweredByTwo=new ArrayList<BigInteger>();
@@ -27,6 +27,13 @@ public class EllipticCurveMV {
 	Point H;
 	Point GonCurve;
 	
+	//elliptic curve paramter initialization
+	public void ParameterInitialization() throws IOException{
+		String aparameter=readParameters(1, 0);
+		a=new BigInteger(aparameter);
+		String bparameter=readParameters(0, 1);
+		b=new BigInteger(bparameter);
+	}
 	//generation of modulus p(in this case 192bit)
 	public BigInteger generateP(){
 		int exp=0;
@@ -311,7 +318,7 @@ public class EllipticCurveMV {
 
 		    while (line != null) {
 		        sb.append(line);
-		        //sb.append(System.lineSeparator());
+		        sb.append(System.lineSeparator());
 		        line = br.readLine();
 		    }
 		  everything = sb.toString();
@@ -321,6 +328,57 @@ public class EllipticCurveMV {
 		message=everything.getBytes();
 		return message; 
 	}
+	
+	//read parameters from file
+	public String readParameters(int a,int b) throws IOException{
+		//BufferedReader brA = new BufferedReader(new FileReader("D:/git/MenezesVanstone/MenezesVanstoneECC/src/MVECC/ParameterA.txt"));//enter your path file
+		//BufferedReader brB = new BufferedReader(new FileReader("D:/git/MenezesVanstone/MenezesVanstoneECC/src/MVECC/ParameterB.txt"));
+		String everything;
+		File fileA=new File("D:/git/MenezesVanstone/MenezesVanstoneECC/src/MVECC/ParameterA.txt");
+		File fileB=new File("D:/git/MenezesVanstone/MenezesVanstoneECC/src/MVECC/ParameterB.txt");
+		int sizeA=(int) fileA.length();
+		int sizeB=(int) fileB.length();
+		//byte[] messageA=new byte[sizeA];
+		//byte[] messageB=new byte[sizeB];
+		
+		if(a==1){
+			BufferedReader brA = new BufferedReader(new FileReader("D:/git/MenezesVanstone/MenezesVanstoneECC/src/MVECC/ParameterA.txt"));
+		try {
+		    StringBuilder sb = new StringBuilder();
+		    String line = brA.readLine();
+
+		    while (line != null) {
+		        sb.append(line);
+		        //sb.append(System.lineSeparator());
+		        line = brA.readLine();
+		    }
+		  everything = sb.toString();
+		} finally {
+		    brA.close();
+		}
+		return everything;
+		}
+		
+		else{
+			BufferedReader brB = new BufferedReader(new FileReader("D:/git/MenezesVanstone/MenezesVanstoneECC/src/MVECC/ParameterB.txt"));
+			try {
+			    StringBuilder sb = new StringBuilder();
+			    String line = brB.readLine();
+
+			    while (line != null) {
+			        sb.append(line);
+			        //sb.append(System.lineSeparator());
+			        line = brB.readLine();
+			    }
+			  everything = sb.toString();
+			} finally {
+			    brB.close();
+			}
+			return everything;
+		}
+	}
+	
+	
 	public BigInteger getp(){
 		return p;
 	}
